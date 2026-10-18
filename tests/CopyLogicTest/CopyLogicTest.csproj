@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>CopyLogicTest</AssemblyName>
+    <RootNamespace>CopyLogicTest</RootNamespace>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\..\src\Shared\CopyOptions.cs" Link="CopyOptions.cs" />
+    <Compile Include="..\..\src\Shared\CopyLogic.cs" Link="CopyLogic.cs" />
+    <Compile Include="..\..\src\Shared\IClipboardAccessor.cs" Link="IClipboardAccessor.cs" />
+    <Compile Include="..\..\src\Shared\Staging.cs" Link="Staging.cs" />
+  </ItemGroup>
+</Project>

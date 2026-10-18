@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>UiLayoutTest</AssemblyName>
+    <RootNamespace>UiLayoutTest</RootNamespace>
+    <StartupObject>UiLayoutTest.Entry</StartupObject>
+    <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
+  </PropertyGroup>
+
+  <!-- 直接复用 UI 层源码：排版问题的根因全在 MainForm / 对话框的布局代码里，
+       复制一份副本会导致测试与实际构建产物脱节，因此以链接方式共享。 -->
+  <PropertyGroup>
+    <SrcDir>$(MSBuildProjectDirectory)\..\..\src\</SrcDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(SrcDir)\Shared\CopyOptions.cs" Link="CopyOptions.cs" />
+    <Compile Include="$(SrcDir)\Shared\CopyLogic.cs" Link="CopyLogic.cs" />
+    <Compile Include="$(SrcDir)\Shared\IClipboardAccessor.cs" Link="IClipboardAccessor.cs" />
+    <Compile Include="$(SrcDir)\Shared\Staging.cs" Link="Staging.cs" />
+    <Compile Include="$(SrcDir)\Shared\WindowsClipboard.cs" Link="WindowsClipboard.cs" />
+    <Compile Include="$(SrcDir)\CopyWithFolders\UiMetrics.cs" Link="UiMetrics.cs" />
+    <Compile Include="$(SrcDir)\CopyWithFolders\SettingsStore.cs" Link="SettingsStore.cs" />
+    <Compile Include="$(SrcDir)\CopyWithFolders\PendingListModel.cs" Link="PendingListModel.cs" />
+    <Compile Include="$(SrcDir)\CopyWithFolders\ExplorerSelection.cs" Link="ExplorerSelection.cs" />
+    <Compile Include="$(SrcDir)\CopyWithFolders\LevelPickerDialog.cs" Link="LevelPickerDialog.cs" />
+    <Compile Include="$(SrcDir)\CopyWithFolders\ConflictDialog.cs" Link="ConflictDialog.cs" />
+    <Compile Include="$(SrcDir)\CopyWithFolders\PrecheckDialog.cs" Link="PrecheckDialog.cs" />
+    <Compile Include="$(SrcDir)\CopyWithFolders\CopyScheduler.cs" Link="CopyScheduler.cs" />
+    <Compile Include="$(SrcDir)\CopyWithFolders\MainForm.cs" Link="MainForm.cs" />
+  </ItemGroup>
+</Project>
