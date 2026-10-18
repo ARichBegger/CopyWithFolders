@@ -1,0 +1,47 @@
+# ---- .NET 构建产物 ----
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ll]og/
+[Ll]ogs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+
+# ---- 发布输出 ----
+dist/
+publish/
+*.pdb
+*.nupkg
+
+# ---- 运行时生成（程序所在目录） ----
+settings.json
+settings.json.bak
+settings.json.tmp
+*.log
+
+# ---- 测试产物 ----
+TestResults/
+ui_audit.txt
+[tT]est[Rr]esult*/
+*.trx
+*.coverage
+
+# ---- 操作系统 ----
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# ---- 编辑器 ----
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+*~

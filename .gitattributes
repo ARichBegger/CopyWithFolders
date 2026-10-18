@@ -1,0 +1,15 @@
+# 统一换行与二进制识别，避免跨平台提交产生无意义差异
+* text=auto eol=crlf
+
+*.cs       text eol=crlf
+*.csproj   text eol=crlf
+*.sln      text eol=crlf
+*.ps1      text eol=crlf
+*.md       text eol=crlf
+*.json     text eol=crlf
+*.yml      text eol=crlf
+
+*.png      binary
+*.ico      binary
+*.exe      binary
+*.dll      binary
