@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>CopyWithFolders</AssemblyName>
+    <RootNamespace>CopyWithFolders</RootNamespace>
+    <Version>3.0.0</Version>
+    <FileVersion>3.0.0.0</FileVersion>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
+    <ApplicationDefaultFont>Microsoft YaHei UI, 9pt</ApplicationDefaultFont>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\CopyOptions.cs" Link="Shared\CopyOptions.cs" />
+    <Compile Include="..\Shared\CopyLogic.cs" Link="Shared\CopyLogic.cs" />
+    <Compile Include="..\Shared\IClipboardAccessor.cs" Link="Shared\IClipboardAccessor.cs" />
+    <Compile Include="..\Shared\Staging.cs" Link="Shared\Staging.cs" />
+    <Compile Include="..\Shared\WindowsClipboard.cs" Link="Shared\WindowsClipboard.cs" />
+  </ItemGroup>
+</Project>
