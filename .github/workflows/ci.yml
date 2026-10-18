@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: 构建与逻辑测试
+    runs-on: windows-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: 还原依赖
+        run: |
+          dotnet restore src/CopyWithFolders/CopyWithFolders.csproj
+          dotnet restore tests/CopyLogicTest/CopyLogicTest.csproj
+
+      - name: 编译（Release）
+        run: |
+          dotnet build src/CopyWithFolders/CopyWithFolders.csproj -c Release --no-restore -v minimal
+          dotnet build tests/CopyLogicTest/CopyLogicTest.csproj -c Release --no-restore -v minimal
+
+      - name: 运行核心逻辑测试
+        run: dotnet run --project tests/CopyLogicTest -c Release --no-build

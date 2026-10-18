@@ -1,0 +1,129 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '要发布的标签（例如 v3.0.0）'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: 构建并发布
+    runs-on: windows-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 安装 .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: 解析版本号
+        id: ver
+        shell: pwsh
+        run: |
+          $tag = if ('${{ github.event_name }}' -eq 'workflow_dispatch') { '${{ inputs.tag }}' } else { '${{ github.ref_name }}' }
+          if ([string]::IsNullOrWhiteSpace($tag)) { throw '未能确定标签' }
+          $version = $tag.TrimStart('v')
+          "tag=$tag"            >> $env:GITHUB_OUTPUT
+          "version=$version"    >> $env:GITHUB_OUTPUT
+
+      - name: 还原并编译
+        shell: pwsh
+        run: |
+          dotnet restore src/CopyWithFolders/CopyWithFolders.csproj
+          dotnet restore tests/CopyLogicTest/CopyLogicTest.csproj
+          dotnet build src/CopyWithFolders/CopyWithFolders.csproj -c Release --no-restore -v minimal
+          dotnet build tests/CopyLogicTest/CopyLogicTest.csproj -c Release --no-restore -v minimal
+
+      - name: 校验版本号与标签一致
+        shell: pwsh
+        run: |
+          [xml]$csproj = Get-Content src/CopyWithFolders/CopyWithFolders.csproj
+          $projVer = $csproj.Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1
+          $tagVer = '${{ steps.ver.outputs.version }}'
+          Write-Host "csproj=$projVer  tag=$tagVer"
+          if ($projVer -ne $tagVer) {
+            throw "版本号不一致：csproj 为 $projVer，标签为 $tagVer。请先更新 csproj 再打标签。"
+          }
+
+      - name: 运行核心逻辑测试
+        run: dotnet run --project tests/CopyLogicTest -c Release --no-build
+
+      - name: 发布自包含单文件
+        shell: pwsh
+        run: |
+          dotnet publish src/CopyWithFolders/CopyWithFolders.csproj `
+            -c Release -r win-x64 --self-contained true `
+            -p:PublishSingleFile=true `
+            -p:EnableCompressionInSingleFile=true `
+            -p:IncludeNativeLibrariesForSelfExtract=true `
+            -p:PublishTrimmed=false `
+            -o dist
+
+      - name: 生成校验文件
+        shell: pwsh
+        run: |
+          $exe = 'dist/CopyWithFolders.exe'
+          if (-not (Test-Path $exe)) { throw '未找到 exe 产物' }
+          $hash = (Get-FileHash $exe -Algorithm SHA256).Hash
+          $size = [math]::Round((Get-Item $exe).Length / 1MB, 1)
+          "SHA256: $hash" | Out-File -Encoding utf8 dist/CopyWithFolders.exe.sha256
+          "CopyWithFolders.exe  $size MB  SHA256=$hash"
+          "exe=$exe" >> $env:GITHUB_OUTPUT
+
+      - name: 提取更新日志
+        id: notes
+        shell: pwsh
+        run: |
+          $version = '${{ steps.ver.outputs.version }}'
+          $pattern = "^##\s*\[" + [regex]::Escape($version) + "\]"
+          $lines = Get-Content CHANGELOG.md -Encoding utf8
+          $start = -1
+          for ($i = 0; $i -lt $lines.Count; $i++) {
+            if ($lines[$i] -match $pattern) { $start = $i; break }
+          }
+          if ($start -ge 0) {
+            $end = $lines.Count
+            for ($j = $start + 1; $j -lt $lines.Count; $j++) {
+              if ($lines[$j] -match '^##\s') { $end = $j; break }
+            }
+            $body = $lines[($start + 1)..($end - 1)] -join "`n"
+            $body = $body.Trim()
+          } else {
+            $body = "详见 CHANGELOG.md"
+          }
+          $header = @"
+          ## 下载
+
+          - ``CopyWithFolders.exe`` —— 自包含单文件，Windows 10/11 x64，无需安装 .NET
+
+          校验方式：``Get-FileHash .\CopyWithFolders.exe -Algorithm SHA256``
+
+          "@
+          $full = ($header -replace '(?m)^\s{10}', '') + "`n" + $body
+          $full | Out-File -Encoding utf8 RELEASE_NOTES.md
+          Get-Content RELEASE_NOTES.md | Select-Object -First 12
+
+      - name: 创建 GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create '${{ steps.ver.outputs.tag }}' `
+            'dist/CopyWithFolders.exe' `
+            'dist/CopyWithFolders.exe.sha256' `
+            --title 'CopyWithFolders ${{ steps.ver.outputs.version }}' `
+            --notes-file RELEASE_NOTES.md `
+            --verify-tag
